@@ -9,16 +9,45 @@
 
 
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
-window.countNQueensSolutions = function(n) {
+window.bitShiftNQueensSolutions = function(n) {
+  var solutions = 0;
+  solutions = window.bitShiftCombinations(n);
+  console.log('Number of solutions for ' + n + ' queens:', solutions);
+  return solutions;
+};
+
+window.countNQueensSolutions = function(n){
   var solutions = 0;
   solutions = window.findQueensCombinations(solutions,n);
   console.log('Number of solutions for ' + n + ' queens:', solutions);
   return solutions;
 };
 
+// Uses bit shifting to drastically improve performance on n-Queens
+window.bitShiftCombinations = function(n){
+  var solutionCount = 0;
+  var ones = (1 << n) - 1;
+  var helper = function(minor, columns, major){
+    var openSquares = ~(minor | columns | major) & ones;
+    while(openSquares){
+      var next = -openSquares & openSquares;
+      openSquares ^= next;
+      helper((minor | next) << 1, (next | columns), (major | next) >> 1);
+    }
+    if(columns === ones){
+      solutionCount++;
+    }
+  };
+  helper(0,0,0);
+  return solutionCount;
+};
+
+
+
+// Uses filtering and recursive if loops to generate all valid board positions
 window.findQueensCombinations = function(solutions, n, piecesLeft, prev, occupiedColumns, occupiedMajors, occupiedMinors){
   if(piecesLeft === 0 || n === 0){
-    solutions ++;
+    solutions++;
   } else if(piecesLeft === undefined){
     piecesLeft = n;
   }
@@ -64,8 +93,6 @@ window.findQueensCombinations = function(solutions, n, piecesLeft, prev, occupie
   }
   return solutions;
 };
-
-
 
 
 
